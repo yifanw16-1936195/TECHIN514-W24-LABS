@@ -26,6 +26,8 @@ void setup() {
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Change to 0x3D if necessary
     Serial.println(F("SSD1306 allocation failed"));
     for(;;); // Don't proceed, loop forever
+  } else {
+    Serial.println(F("SSD1306 allocation successful"));
   }
   display.display();
   delay(2000); // Pause for 2 seconds
@@ -35,12 +37,16 @@ void setup() {
   if (!mpu.begin()) {
     Serial.println(F("Failed to find MPU6050 chip"));
     while (1);
+  } else {
+    Serial.println(F("MPU6050 initialization successful"));
   }
 
   // Initialize BME280
   if (!bme.begin(0x76)) { // Change to 0x77 if necessary
     Serial.println(F("Could not find a valid BME280 sensor, check wiring!"));
     while (1);
+  } else {
+    Serial.println(F("BME280 initialization successful"));
   }
 }
 
