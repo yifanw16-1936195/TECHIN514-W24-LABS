@@ -21,6 +21,7 @@ Adafruit_BME280 bme;
 void setup() {
   Serial.begin(115200);
   while (!Serial); // Wait for serial port to connect
+
   // Initialize OLED display
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Change to 0x3D if necessary
     Serial.println(F("SSD1306 allocation failed"));
@@ -41,7 +42,6 @@ void setup() {
     Serial.println(F("Could not find a valid BME280 sensor, check wiring!"));
     while (1);
   }
-
 }
 
 void loop() {
@@ -49,34 +49,49 @@ void loop() {
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
 
-  // Display BME280 data on OLED
-  display.clearDisplay();
-  display.setTextSize(1.5);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0,0);
-  display.print(F("Temp: "));
-  display.print(bme.readTemperature());
-  display.println(F("C"));
+  // Determine tilt direction
+  String tiltDirection = "";
+  if (a.acceleration.x > 1.0) {
+    tiltDirection = "Right";
+  } else if (a.acceleration.x < -1.0) {
+    tiltDirection = "Left";
+  } else if (a.acceleration.y > 1.0) {
+    tiltDirection = "Up";
+  } else if (a.acceleration.y < -1.0) {
+    tiltDirection = "Down";
+  } else {
+    tiltDirection = "Flat";
+  }
 
-  display.setCursor(0, 10);
-  display.print(F("Humidity: "));
-  display.print(bme.readHumidity());
-  display.println(F("%"));
+  // Read and round temperature and humidity
+  float temperature = round(bme.readTemperature() * 10) / 10.0;
+  float humidity = round(bme.readHumidity() * 10) / 10.0;
+
+  // Centering the text on the display
+  display.clearDisplay();
+  display.setTextSize(2); // Larger text size
+  display.setTextColor(SSD1306_WHITE);
+
+  int16_t x1, y1;
+  uint16_t w, h;
+
+  // Center and display temperature
+  String tempString = "Temp:" + String(temperature, 1) + "C";
+  display.getTextBounds(tempString, 0, 0, &x1, &y1, &w, &h);
+  display.setCursor((SCREEN_WIDTH - w) / 2, 0);
+  display.print(tempString);
+
+  // Center and display humidity
+  String humString = "Hum:" + String(humidity, 1) + "%";
+  display.getTextBounds(humString, 0, 0, &x1, &y1, &w, &h);
+  display.setCursor((SCREEN_WIDTH - w) / 2, 16 + 4); // Additional padding
+  display.print(humString);
+
+  // Center and display tilt direction
+  display.getTextBounds(tiltDirection, 0, 0, &x1, &y1, &w, &h);
+  display.setCursor((SCREEN_WIDTH - w) / 2, 32 + 8); // Additional padding
+  display.print(tiltDirection);
   
   display.display();
-  delay(2000); // Wait for 2 seconds
-
-  // Display MPU6050 data on OLED
-  display.clearDisplay();
-  display.setTextSize(1.5);
-  display.setCursor(0,0);
-  display.print(F("Gyro X: "));
-  display.print(g.gyro.x);
-
-  display.setCursor(0, 10);
-  display.print(F("Gyro Y: "));
-  display.print(g.gyro.y);
-
-  display.display();
-  delay(2000); // Wait for 2 seconds before next loop
+  delay(1000); // Update every second
 }
