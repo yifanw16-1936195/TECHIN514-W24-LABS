@@ -40,10 +40,9 @@ void initFirebase();
 void sendDataToFirebase(float distance);
 
 // Sleep for 30 seconds in microseconds
-#define SLEEP_DURATION 30000 
 unsigned long lastBelowThresholdTime = 0;
-// 40 cm threshold
-const float distanceThreshold = 40.0; 
+// 30 cm threshold
+const float distanceThreshold = 30.0; 
 
 void setup() {
   // put your setup code here, to run once:
@@ -59,10 +58,10 @@ void setup() {
       lastBelowThresholdTime = millis();
     }
     
-    if (millis() - lastBelowThresholdTime >= 20000) { // 20 seconds have passed
-      Serial.println("Distance > 50cm for 30 seconds. Going to sleep.");
+    if (millis() - lastBelowThresholdTime >= 20000) { d
+      Serial.println("Distance > 30cm for 30 seconds. Going to sleep.");
       WiFi.disconnect();
-      esp_sleep_enable_timer_wakeup(SLEEP_DURATION * 1000); // Set sleep duration in microseconds
+      esp_sleep_enable_timer_wakeup(SLEEP_DURATION * 1000); 
       esp_deep_sleep_start(); // Go to sleep
     }
     
